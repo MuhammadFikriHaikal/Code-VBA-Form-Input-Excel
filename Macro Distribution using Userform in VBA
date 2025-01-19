@@ -121,3 +121,18 @@ Private Function GetWorkbook(targetPath As String) As Workbook
     End If
     Set GetWorkbook = wb
 End Function
+
+Private Sub UserForm_Initialize()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim cell As Range
+    
+    ' Referensi ke worksheet dan range data
+    Set ws = ThisWorkbook.Sheets("Sheet3")
+    Set rng = ws.Range("B1:B4")
+
+    ' Tambahkan data dari range ke ComboBox
+    For Each cell In rng
+        Me.ComboBox1.AddItem cell.Value
+    Next cell
+End Sub
