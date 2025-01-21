@@ -129,3 +129,42 @@ Private Sub UserForm_Initialize()
         Me.ComboBoxSizeGT.AddItem cell.Value
     Next cell
 End Sub
+
+Private Sub ComboBoxSizeGT_Change()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim sizeRow As Range
+    Dim selectedSize As String
+    Dim mapping As Object
+    Dim key As Variant
+
+    ' Referensi worksheet sumber data
+    Set ws = ThisWorkbook.Sheets("data_spec")
+    Set rng = ws.Range("A2:L5") ' Pastikan range mencakup semua data Anda
+
+    ' Ambil nilai dari ComboBox
+    selectedSize = Me.ComboBoxSizeGT.Value
+
+    ' Buat mapping antara Label dan kolom
+    Set mapping = CreateObject("Scripting.Dictionary")
+    mapping.Add "Label1", 2  ' Kolom B
+    mapping.Add "Label2", 3  ' Kolom D
+    mapping.Add "Label3", 4  ' Kolom F
+    ' Tambahkan mapping lainnya sesuai kebutuhan...
+
+    ' Cari baris data untuk Size yang dipilih
+    For Each sizeRow In rng.Columns(1).Cells
+        If sizeRow.Value = selectedSize Then
+            ' Tampilkan data di Label sesuai mapping
+            For Each key In mapping.Keys
+                Me.Controls(key).Caption = sizeRow.Offset(0, mapping(key) - 1).Value
+            Next key
+            Exit Sub
+        End If
+    Next sizeRow
+
+    ' Jika Size tidak ditemukan, kosongkan label
+    For Each key In mapping.Keys
+        Me.Controls(key).Caption = "Data tidak ditemukan"
+    Next key
+End Sub
