@@ -1,12 +1,11 @@
 Private Sub CmdSave_Click()
-    On Error GoTo ErrorHandler ' Mulai blok error handling
     
     ' Deklarasi Workbook dan Worksheet
     Dim wbDatabase As Workbook
     Dim wsDatabase As Worksheet
     Dim targetPath As String
     Dim dbLastRow As Long
-    Dim checkBoxes() As String
+    Dim checkBoxes As Variant
     Dim numFilledChecks As Integer
     Dim i As Integer
     Dim key As Variant
@@ -40,7 +39,7 @@ Private Sub CmdSave_Click()
 
     ' TextBox data utama (Date, Group, Shift, Machine, Size)
     Dim mainDataBoxes As Variant
-    mainDataBoxes = Array("TextBoxDate", "TextBoxGroup", "TextBoxShift", "TextBoxMachine", "TextBoxSize")
+    mainDataBoxes = Array("TextBoxDate", "TextBoxGroup", "TextBoxShift", "TextBoxMachine")
 
     ' Validasi input untuk TextBox data utama
     For i = LBound(mainDataBoxes) To UBound(mainDataBoxes)
@@ -59,7 +58,7 @@ Private Sub CmdSave_Click()
             .Cells(dbLastRow, 2).Value = Me.TextBoxGroup.Value ' Kolom Group
             .Cells(dbLastRow, 3).Value = Me.TextBoxShift.Value ' Kolom Shift
             .Cells(dbLastRow, 4).Value = Me.TextBoxMachine.Value ' Kolom Machine
-            .Cells(dbLastRow, 5).Value = Me.TextBoxSize.Value ' Kolom Size
+            .Cells(dbLastRow, 5).Value = Me.ComboBoxSizeGT.Value
             dbLastRow = dbLastRow + 1 ' Pindah ke baris berikutnya
         Next i
     End With
@@ -68,8 +67,8 @@ Private Sub CmdSave_Click()
     Dim mapping As Object
     Set mapping = CreateObject("Scripting.Dictionary")
     mapping.Add "TextBoxP1", "F" ' TextBoxP1 -> Kolom F
-    mapping.Add "TextBoxP2", "G" ' TextBoxP2 -> Kolom G
-    mapping.Add "TextBoxP3", "H" ' TextBoxP3 -> Kolom H
+    mapping.Add "TextBoxP2", "F" ' TextBoxP2 -> Kolom G
+    mapping.Add "TextBoxP3", "F" ' TextBoxP3 -> Kolom H
     ' Tambahkan lebih banyak TextBox sesuai kebutuhan...
 
     ' Pindahkan data pengecekan ke worksheet
@@ -82,7 +81,6 @@ Private Sub CmdSave_Click()
 
     ' Simpan workbook
     wbDatabase.Save
-    wbDatabase.Close
 
     ' Bersihkan TextBox setelah save
     Dim excludeList As Object
@@ -91,7 +89,7 @@ Private Sub CmdSave_Click()
     excludeList.Add "TextBoxShift", True ' Contoh: TextBoxShift tidak akan dihapus
 
     For Each key In mainDataBoxes
-        If Not excludeList.exists(key) Then
+        If Not excludeList.Exists(key) Then
             Me.Controls(key).Value = ""
         End If
     Next key
@@ -102,11 +100,6 @@ Private Sub CmdSave_Click()
 
     MsgBox "Data berhasil disimpan sebanyak " & numFilledChecks & " kali!", vbInformation
     Exit Sub ' Keluar dari prosedur
-
-ErrorHandler:
-    ' Logging error ke worksheet log
-    LogError Err.Number, Err.Description, "CmdSave_Click"
-    MsgBox "Terjadi error: " & Err.Description, vbCritical
 End Sub
 
 ' Fungsi untuk membuka workbook
@@ -128,11 +121,11 @@ Private Sub UserForm_Initialize()
     Dim cell As Range
     
     ' Referensi ke worksheet dan range data
-    Set ws = ThisWorkbook.Sheets("Sheet3")
-    Set rng = ws.Range("B1:B4")
+    Set ws = ThisWorkbook.Sheets("data_spec")
+    Set rng = ws.Range("A2:A5")
 
     ' Tambahkan data dari range ke ComboBox
     For Each cell In rng
-        Me.ComboBox1.AddItem cell.Value
+        Me.ComboBoxSizeGT.AddItem cell.Value
     Next cell
 End Sub
