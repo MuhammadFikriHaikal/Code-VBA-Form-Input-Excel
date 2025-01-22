@@ -145,3 +145,79 @@ Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
     End If
 End Sub
 
+' LOGIC LOGIN BARU ADMIN/TAMU
+Private Sub cmdLogin_Click()
+    Dim username As String, password As String
+    Dim userFile As String
+    Dim ws As Worksheet
+    Dim foundRow As Range
+    Dim userRole As String
+
+    ' File dan sheet data pengguna
+    userFile = "C:\Users\Username\Documents\UserData.xlsx" ' Ganti dengan lokasi file Anda
+
+    ' Ambil input dari TextBox
+    username = TextBoxUsername.Value
+    password = TextBoxPassword.Value
+
+    ' Cek apakah file ada
+    If Dir(userFile) = "" Then
+        MsgBox "File data pengguna tidak ditemukan!", vbCritical
+        Exit Sub
+    End If
+
+    ' Buka file pengguna
+    Dim wb As Workbook
+    Set wb = Workbooks.Open(userFile)
+    Set ws = wb.Sheets(1) ' Asumsi data ada di sheet pertama
+
+    ' Cari username di file pengguna
+    Set foundRow = ws.Columns("A").Find(What:=username, LookIn:=xlValues, LookAt:=xlWhole)
+
+    If Not foundRow Is Nothing Then
+        ' Cek password
+        If foundRow.Offset(0, 1).Value = password Then
+            ' Ambil peran pengguna
+            userRole = foundRow.Offset(0, 2).Value
+
+            ' Tutup file pengguna
+            wb.Close SaveChanges:=False
+
+            ' Buka dashboard sesuai peran
+            UserFormDashboard.InitializeAccess userRole
+            UserFormDashboard.Show
+            Unload Me
+        Else
+            MsgBox "Password salah!", vbExclamation
+            wb.Close SaveChanges:=False
+        End If
+    Else
+        MsgBox "Username tidak ditemukan!", vbExclamation
+        wb.Close SaveChanges:=False
+    End If
+End Sub
+
+' CODE UNTUK DI USERFORM DASHBOARDNYA
+Public Sub InitializeAccess(ByVal role As String)
+    If role = "Admin" Then
+        EnableEditMode True
+        MsgBox "Selamat datang, Admin!", vbInformation
+    ElseIf role = "Tamu" Then
+        EnableEditMode False
+        MsgBox "Selamat datang, Tamu! Anda hanya dapat membaca data.", vbInformation
+    End If
+End Sub
+
+Private Sub EnableEditMode(ByVal canEdit As Boolean)
+    Dim ctrl As Control
+
+    For Each ctrl In Me.Controls
+        If TypeOf ctrl Is TextBox Then
+            ctrl.Locked = Not canEdit
+        ElseIf TypeOf ctrl Is CommandButton Then
+            If ctrl.Name = "CommandButtonAdd" Then
+                ctrl.Enabled = canEdit
+            End If
+        End If
+    Next ctrl
+End Sub
