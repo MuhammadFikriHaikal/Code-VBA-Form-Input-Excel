@@ -197,6 +197,18 @@ Private Sub cmdLogin_Click()
     End If
 End Sub
 
+' LOGIC USERNAME & PASSWORD MENGGUNAKAN SELECT CASE
+Function GetLogin(User As String, Pass As String) As Boolean
+    Dim Passsword As String
+        Select Case User
+            Case "fikri": Password = "fikri"
+            Case "nabila": Password = "nabila"
+            Case "yehes": Password = "yehes"
+            Case Else: GetLogin = False
+        End Select
+            GetLogin = IIf(Password = Pass, True, False)
+End Function
+
 ' CODE UNTUK DI USERFORM DASHBOARDNYA
 Public Sub InitializeAccess(ByVal role As String)
     If role = "Admin" Then
